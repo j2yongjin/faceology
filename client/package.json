@@ -1,0 +1,19 @@
+{
+  "name": "faceology-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "expo start",
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "build": "expo export --platform ios --output-dir dist-ios"
+  },
+  "dependencies": {
+    "expo": "^52.0.0",
+    "expo-image-picker": "~16.0.5",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  }
+}

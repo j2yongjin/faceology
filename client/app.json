@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Faceology",
+    "slug": "faceology",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f6f9ff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.faceology.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "얼굴 촬영 후 오락용 관상 분석 결과를 제공하기 위해 카메라 접근이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "사진 업로드를 통해 오락용 관상 분석 결과를 제공하기 위해 사진 라이브러리 접근이 필요합니다."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-image-picker"]
+  }
+}
