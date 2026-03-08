@@ -11,6 +11,7 @@
 - 분석 요청 및 결과 표시
 - 결과 공유/결과 카드 열기/삭제 요청
 - 앱 내 서버 주소 입력(실기기 로컬 IP 연결)
+- 상단/하단 AdMob 배너 표시(Development Build, 비개인화 광고 요청)
 
 2. `server` (Node + Express)
 - 이미지 업로드 처리(`multer` 메모리 저장)
@@ -41,3 +42,4 @@
 - 파일 형식/크기 제한(10MB)
 - 오락용 면책 문구 응답 포함
 - 동의 없이는 분석 거부
+- 광고 요청은 기본적으로 `requestNonPersonalizedAdsOnly` 옵션 사용

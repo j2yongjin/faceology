@@ -14,6 +14,7 @@ import {
   View
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { ADS_CONFIG, ADS_MODULE } from "./src/config/adMobConfig";
 
 const DEFAULT_API_BASE_URL = "http://localhost:4000";
 const MAX_VARIATION = 2;
@@ -62,6 +63,29 @@ async function pickImage(fromCamera) {
     allowsEditing: true,
     aspect: [1, 1]
   });
+}
+
+function AdBanner({ unitId }) {
+  const [hidden, setHidden] = useState(false);
+  const BannerAd = ADS_MODULE.BannerAd;
+  const BannerAdSize = ADS_MODULE.BannerAdSize;
+
+  if (!ADS_CONFIG.enabled || hidden || !unitId || !BannerAd || !BannerAdSize) {
+    return null;
+  }
+
+  return (
+    <View style={styles.bannerContainer}>
+      <BannerAd
+        unitId={unitId}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={ADS_CONFIG.requestOptions}
+        onAdFailedToLoad={() => {
+          setHidden(true);
+        }}
+      />
+    </View>
+  );
 }
 
 export default function App() {
@@ -223,130 +247,134 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.eyebrow}>ENTERTAINMENT ONLY</Text>
-        <Text style={styles.title}>Faceology iPhone App</Text>
-        <Text style={styles.description}>
-          오락용 관상 해석 앱입니다. 결과는 재미를 위한 정보이며 의학/법률/채용/신용 판단 근거로
-          사용할 수 없습니다.
-        </Text>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>서버 주소 설정</Text>
-          <TextInput
-            style={styles.input}
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={apiBaseUrl}
-            onChangeText={setApiBaseUrl}
-            placeholder="http://192.168.0.10:4000"
-          />
-          <Text style={styles.helpText}>
-            iPhone 실기기에서는 `localhost` 대신 서버가 실행 중인 Mac의 로컬 IP 주소를 입력하세요.
+      <View style={styles.screen}>
+        <AdBanner unitId={ADS_CONFIG.topBannerUnitId} />
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.eyebrow}>ENTERTAINMENT ONLY</Text>
+          <Text style={styles.title}>Faceology iPhone App</Text>
+          <Text style={styles.description}>
+            오락용 관상 해석 앱입니다. 결과는 재미를 위한 정보이며 의학/법률/채용/신용 판단 근거로
+            사용할 수 없습니다.
           </Text>
-        </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>1) 동의 및 이미지 선택</Text>
-          <View style={styles.switchRow}>
-            <Switch value={consent} onValueChange={setConsent} />
-            <Text style={styles.switchText}>
-              얼굴 이미지는 분석 처리 후 삭제되며 오락용 결과 제공에 동의합니다.
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>서버 주소 설정</Text>
+            <TextInput
+              style={styles.input}
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={apiBaseUrl}
+              onChangeText={setApiBaseUrl}
+              placeholder="http://192.168.0.10:4000"
+            />
+            <Text style={styles.helpText}>
+              iPhone 실기기에서는 `localhost` 대신 서버가 실행 중인 Mac의 로컬 IP 주소를 입력하세요.
             </Text>
           </View>
 
-          <View style={styles.row}>
-            <Pressable style={styles.primaryButton} onPress={() => handlePickImage(true)}>
-              <Text style={styles.buttonText}>카메라 촬영</Text>
-            </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={() => handlePickImage(false)}>
-              <Text style={styles.buttonText}>사진 앨범 선택</Text>
-            </Pressable>
-          </View>
-
-          {imageAsset?.uri ? <Image source={{ uri: imageAsset.uri }} style={styles.preview} /> : null}
-
-          <View style={styles.row}>
-            <Pressable
-              style={[styles.primaryButton, !canAnalyze && styles.disabledButton]}
-              disabled={!canAnalyze}
-              onPress={() => runAnalyze(0)}
-            >
-              <Text style={styles.buttonText}>분석 시작</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.secondaryButton, !canRegenerate && styles.disabledButton]}
-              disabled={!canRegenerate}
-              onPress={() => runAnalyze(variation + 1)}
-            >
-              <Text style={styles.buttonText}>같은 사진 재생성</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {loading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="small" color="#0b5fff" />
-            <Text style={styles.loadingText}>분석/요청 처리 중...</Text>
-          </View>
-        ) : null}
-
-        {error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        ) : null}
-
-        {status ? (
-          <View style={styles.statusBox}>
-            <Text style={styles.statusText}>{status}</Text>
-          </View>
-        ) : null}
-
-        {analysis?.result ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>2) 분석 결과</Text>
-            <Text style={styles.disclaimer}>{analysis.disclaimer}</Text>
-
-            <View style={styles.resultItem}>
-              <Text style={styles.resultTitle}>성향</Text>
-              <Text style={styles.resultBody}>{analysis.result.tendency}</Text>
-            </View>
-
-            <View style={styles.resultItem}>
-              <Text style={styles.resultTitle}>대인관계</Text>
-              <Text style={styles.resultBody}>{analysis.result.relationship}</Text>
-            </View>
-
-            <View style={styles.resultItem}>
-              <Text style={styles.resultTitle}>일/커리어</Text>
-              <Text style={styles.resultBody}>{analysis.result.career}</Text>
-            </View>
-
-            <View style={styles.resultItem}>
-              <Text style={styles.resultTitle}>금전/행운 포인트</Text>
-              <Text style={styles.resultBody}>{analysis.result.fortune}</Text>
-            </View>
-
-            <View style={styles.quoteBox}>
-              <Text style={styles.quoteText}>{analysis.result.todayLine}</Text>
+            <Text style={styles.cardTitle}>1) 동의 및 이미지 선택</Text>
+            <View style={styles.switchRow}>
+              <Switch value={consent} onValueChange={setConsent} />
+              <Text style={styles.switchText}>
+                얼굴 이미지는 분석 처리 후 삭제되며 오락용 결과 제공에 동의합니다.
+              </Text>
             </View>
 
             <View style={styles.row}>
-              <Pressable style={styles.primaryButton} onPress={shareResult}>
-                <Text style={styles.buttonText}>결과 공유</Text>
+              <Pressable style={styles.primaryButton} onPress={() => handlePickImage(true)}>
+                <Text style={styles.buttonText}>카메라 촬영</Text>
               </Pressable>
-              <Pressable style={styles.secondaryButton} onPress={openResultCard}>
-                <Text style={styles.buttonText}>결과 카드 열기</Text>
+              <Pressable style={styles.secondaryButton} onPress={() => handlePickImage(false)}>
+                <Text style={styles.buttonText}>사진 앨범 선택</Text>
               </Pressable>
             </View>
 
-            <Pressable style={styles.deleteButton} onPress={deleteAnalysis}>
-              <Text style={styles.buttonText}>분석 데이터 삭제</Text>
-            </Pressable>
+            {imageAsset?.uri ? <Image source={{ uri: imageAsset.uri }} style={styles.preview} /> : null}
+
+            <View style={styles.row}>
+              <Pressable
+                style={[styles.primaryButton, !canAnalyze && styles.disabledButton]}
+                disabled={!canAnalyze}
+                onPress={() => runAnalyze(0)}
+              >
+                <Text style={styles.buttonText}>분석 시작</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.secondaryButton, !canRegenerate && styles.disabledButton]}
+                disabled={!canRegenerate}
+                onPress={() => runAnalyze(variation + 1)}
+              >
+                <Text style={styles.buttonText}>같은 사진 재생성</Text>
+              </Pressable>
+            </View>
           </View>
-        ) : null}
-      </ScrollView>
+
+          {loading ? (
+            <View style={styles.loadingBox}>
+              <ActivityIndicator size="small" color="#0b5fff" />
+              <Text style={styles.loadingText}>분석/요청 처리 중...</Text>
+            </View>
+          ) : null}
+
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
+          {status ? (
+            <View style={styles.statusBox}>
+              <Text style={styles.statusText}>{status}</Text>
+            </View>
+          ) : null}
+
+          {analysis?.result ? (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>2) 분석 결과</Text>
+              <Text style={styles.disclaimer}>{analysis.disclaimer}</Text>
+
+              <View style={styles.resultItem}>
+                <Text style={styles.resultTitle}>성향</Text>
+                <Text style={styles.resultBody}>{analysis.result.tendency}</Text>
+              </View>
+
+              <View style={styles.resultItem}>
+                <Text style={styles.resultTitle}>대인관계</Text>
+                <Text style={styles.resultBody}>{analysis.result.relationship}</Text>
+              </View>
+
+              <View style={styles.resultItem}>
+                <Text style={styles.resultTitle}>일/커리어</Text>
+                <Text style={styles.resultBody}>{analysis.result.career}</Text>
+              </View>
+
+              <View style={styles.resultItem}>
+                <Text style={styles.resultTitle}>금전/행운 포인트</Text>
+                <Text style={styles.resultBody}>{analysis.result.fortune}</Text>
+              </View>
+
+              <View style={styles.quoteBox}>
+                <Text style={styles.quoteText}>{analysis.result.todayLine}</Text>
+              </View>
+
+              <View style={styles.row}>
+                <Pressable style={styles.primaryButton} onPress={shareResult}>
+                  <Text style={styles.buttonText}>결과 공유</Text>
+                </Pressable>
+                <Pressable style={styles.secondaryButton} onPress={openResultCard}>
+                  <Text style={styles.buttonText}>결과 카드 열기</Text>
+                </Pressable>
+              </View>
+
+              <Pressable style={styles.deleteButton} onPress={deleteAnalysis}>
+                <Text style={styles.buttonText}>분석 데이터 삭제</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </ScrollView>
+        <AdBanner unitId={ADS_CONFIG.bottomBannerUnitId} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -356,9 +384,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f6f9ff"
   },
+  screen: {
+    flex: 1
+  },
+  bannerContainer: {
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6
+  },
   container: {
     padding: 16,
-    paddingBottom: 32
+    paddingBottom: 24
   },
   eyebrow: {
     fontSize: 12,
